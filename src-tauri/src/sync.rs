@@ -62,7 +62,7 @@ fn link_dir(instances: &[&Instance], dir_name: &str) -> std::io::Result<()> {
         if let Some(parent) = target.parent() {
             std::fs::create_dir_all(parent)?;
         }
-        std::os::unix::fs::symlink(&shared, &target)?;
+        symlink_dir(&shared, &target)?;
     }
     Ok(())
 }
@@ -121,7 +121,7 @@ fn link_file(instances: &[&Instance], file_name: &str) -> std::io::Result<()> {
             if let Some(parent) = target.parent() {
                 std::fs::create_dir_all(parent)?;
             }
-            std::os::unix::fs::symlink(&shared_file, &target)?;
+            symlink_file(&shared_file, &target)?;
         }
     }
     Ok(())
@@ -191,6 +191,26 @@ fn compress_png_to_jpg(path: &Path) {
             std::fs::remove_file(path).ok();
         }
     }
+}
+
+// ─── Cross-platform symlink helpers ──────────────────────────────────────────
+
+fn symlink_dir(src: &Path, dst: &Path) -> std::io::Result<()> {
+    #[cfg(unix)]
+    { std::os::unix::fs::symlink(src, dst) }
+    #[cfg(windows)]
+    { std::os::windows::fs::symlink_dir(src, dst) }
+    #[cfg(not(any(unix, windows)))]
+    { let _ = (src, dst); Err(std::io::Error::new(std::io::ErrorKind::Unsupported, "symlinks not supported on this platform")) }
+}
+
+fn symlink_file(src: &Path, dst: &Path) -> std::io::Result<()> {
+    #[cfg(unix)]
+    { std::os::unix::fs::symlink(src, dst) }
+    #[cfg(windows)]
+    { std::os::windows::fs::symlink_file(src, dst) }
+    #[cfg(not(any(unix, windows)))]
+    { let _ = (src, dst); Err(std::io::Error::new(std::io::ErrorKind::Unsupported, "symlinks not supported on this platform")) }
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
