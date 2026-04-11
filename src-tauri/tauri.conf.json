@@ -1,0 +1,45 @@
+{
+  "productName": "Nova Launcher",
+  "version": "0.1.0",
+  "identifier": "dev.novalauncher.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Nova Launcher",
+        "width": 1100,
+        "height": 700,
+        "minWidth": 900,
+        "minHeight": 600,
+        "resizable": true,
+        "decorations": true,
+        "visible": false
+      },
+      {
+        "label": "splashscreen",
+        "title": "Nova Launcher",
+        "url": "/splashscreen.html",
+        "width": 360,
+        "height": 420,
+        "resizable": false,
+        "decorations": false,
+        "center": true,
+        "alwaysOnTop": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/icon.png", "icons/128x128.png", "icons/128x128@2x.png"]
+  }
+}

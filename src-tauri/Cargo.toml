@@ -1,0 +1,46 @@
+[package]
+name = "nova-launcher"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "nova_launcher_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["devtools"] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "stream", "multipart"] }
+uuid = { version = "1", features = ["v4", "v3"] }
+dirs = "5"
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1"
+thiserror = "1"
+sha1 = "0.10"
+hex = "0.4"
+open = "5"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+futures = "0.3"
+futures-util = "0.3"
+zip = "0.6"
+base64 = "0.22"
+url = "2"
+rand = "0.8"
+flate2 = "1"
+urlencoding = "2"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+
+# Secret-Service-Backend nur auf Linux nötig; Windows/macOS nutzen native Keystores
+[target.'cfg(target_os = "linux")'.dependencies]
+keyring = { version = "2", features = ["linux-secret-service-rt-tokio-crypto-rust"] }
+
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+keyring = { version = "2" }
