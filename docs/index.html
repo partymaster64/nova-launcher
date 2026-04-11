@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Nova Launcher – ein schneller, moderner Minecraft-Launcher für Linux, Windows und macOS." />
+  <title>Nova Launcher</title>
+  <link rel="icon" href="icon.png" />
+  <style>
+    :root {
+      --accent: #a855f7;
+      --accent-dark: #7c3aed;
+      --accent-glow: rgba(168, 85, 247, 0.35);
+      --bg: #0d0d14;
+      --surface: #13131f;
+      --surface2: #1a1a2e;
+      --text: #e8e8f0;
+      --muted: #8888aa;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background glow ── */
+    body::before {
+      content: "";
+      position: fixed;
+      top: -20vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80vw;
+      height: 60vh;
+      background: radial-gradient(ellipse, rgba(168,85,247,0.18) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 60px;
+      background: rgba(13,13,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(168,85,247,0.15);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo img { width: 28px; height: 28px; border-radius: 6px; }
+
+    nav ul {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    nav a:hover { color: var(--accent); }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 7rem 1.5rem 5rem;
+    }
+
+    .hero-icon {
+      width: 96px;
+      height: 96px;
+      border-radius: 20px;
+      box-shadow: 0 0 40px var(--accent-glow);
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.6rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 24px var(--accent-glow);
+    }
+
+    .btn-primary:hover { box-shadow: 0 6px 32px rgba(168,85,247,0.55); }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid rgba(168,85,247,0.25);
+    }
+
+    .btn-secondary:hover { border-color: var(--accent); }
+
+    /* ── Badges ── */
+    .badges {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 3rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid rgba(168,85,247,0.2);
+    }
+
+    /* ── Features ── */
+    .section {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      letter-spacing: -0.01em;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid rgba(168,85,247,0.12);
+      border-radius: 14px;
+      padding: 1.6rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(168,85,247,0.4);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── Downloads ── */
+    .downloads {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .dl-card {
+      background: var(--surface);
+      border: 1px solid rgba(168,85,247,0.12);
+      border-radius: 14px;
+      padding: 1.6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .dl-card:hover { border-color: rgba(168,85,247,0.4); }
+
+    .dl-icon { font-size: 2.5rem; }
+
+    .dl-card h3 { font-size: 1.05rem; font-weight: 700; }
+
+    .dl-card p { font-size: 0.8rem; color: var(--muted); }
+
+    /* ── Stack ── */
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .stack-pill {
+      background: var(--surface2);
+      border: 1px solid rgba(168,85,247,0.2);
+      border-radius: 999px;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .stack-pill span { color: var(--accent); font-weight: 600; }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(168,85,247,0.25), transparent);
+      margin: 0 1.5rem;
+    }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="#">
+      <img src="icon.png" alt="Nova" />
+      Nova Launcher
+    </a>
+    <ul>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#download">Download</a></li>
+      <li><a href="https://github.com/partymaster64/nova-launcher" target="_blank">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <img class="hero-icon" src="icon.png" alt="Nova Launcher" />
+    <div class="badges">
+      <span class="badge">Linux</span>
+      <span class="badge">Windows</span>
+      <span class="badge">macOS</span>
+      <span class="badge">Tauri 2</span>
+      <span class="badge">Open Source</span>
+    </div>
+    <h1>Nova Launcher</h1>
+    <p>A fast, beautiful Minecraft launcher. Manage instances, browse Modrinth, launch any version — all in one place.</p>
+    <div class="btn-group">
+      <a class="btn btn-primary" href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">
+        &#8595; Download
+      </a>
+      <a class="btn btn-secondary" href="https://github.com/partymaster64/nova-launcher" target="_blank">
+        View on GitHub
+      </a>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <h2 class="section-title">Everything you need</h2>
+    <div class="features">
+      <div class="feature-card">
+        <span class="feature-icon">&#128274;</span>
+        <h3>Microsoft Login</h3>
+        <p>Secure OAuth2 device-code flow. Credentials stored in your OS keystore — never in plain text.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&#128194;</span>
+        <h3>Instance Management</h3>
+        <p>Multiple isolated instances with their own versions, mods and settings. Switch in one click.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&#127757;</span>
+        <h3>Modrinth Integration</h3>
+        <p>Browse and install mods, modpacks and resource packs directly from Modrinth without leaving the launcher.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&#128126;</span>
+        <h3>Skin Manager</h3>
+        <p>Live 3D preview of your skin powered by skinview3d. Upload and switch skins on the fly.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&#127918;</span>
+        <h3>Discord Rich Presence</h3>
+        <p>Automatically shows what you are playing in your Discord status while a game is running.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&#127760;</span>
+        <h3>Multilingual</h3>
+        <p>Available in German, English and French. More languages can be added via simple JSON locale files.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Downloads -->
+  <section class="section" id="download">
+    <h2 class="section-title">Download</h2>
+    <div class="downloads">
+      <div class="dl-card">
+        <span class="dl-icon">&#128039;</span>
+        <h3>Linux</h3>
+        <p>.AppImage · .deb</p>
+        <a class="btn btn-primary" style="width:100%;justify-content:center"
+           href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">Download</a>
+      </div>
+      <div class="dl-card">
+        <span class="dl-icon">&#129695;</span>
+        <h3>Windows</h3>
+        <p>Setup .exe · .msi</p>
+        <a class="btn btn-primary" style="width:100%;justify-content:center"
+           href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">Download</a>
+      </div>
+      <div class="dl-card">
+        <span class="dl-icon">&#127822;</span>
+        <h3>macOS</h3>
+        <p>.dmg · Universal Binary</p>
+        <a class="btn btn-primary" style="width:100%;justify-content:center"
+           href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">Download</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Stack -->
+  <section class="section">
+    <h2 class="section-title">Built with</h2>
+    <div class="stack">
+      <div class="stack-pill"><span>Tauri 2</span> — native shell</div>
+      <div class="stack-pill"><span>Rust</span> — backend logic</div>
+      <div class="stack-pill"><span>Svelte 4</span> — UI framework</div>
+      <div class="stack-pill"><span>Vite 5</span> — frontend build</div>
+      <div class="stack-pill"><span>reqwest</span> — HTTP client</div>
+      <div class="stack-pill"><span>skinview3d</span> — 3D skin preview</div>
+      <div class="stack-pill"><span>keyring</span> — native credential storage</div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Nova Launcher &mdash; Open Source under the MIT License &mdash;
+      <a href="https://github.com/partymaster64/nova-launcher" target="_blank">GitHub</a>
+    </p>
+  </footer>
+
+</body>
+</html>
