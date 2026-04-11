@@ -3,427 +3,555 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Nova Launcher – ein schneller, moderner Minecraft-Launcher für Linux, Windows und macOS." />
+  <meta name="description" content="Nova Launcher – a fast, modern Minecraft launcher for Linux, Windows and macOS." />
   <title>Nova Launcher</title>
-  <link rel="icon" href="icon.png" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <style>
     :root {
-      --accent: #a855f7;
-      --accent-dark: #7c3aed;
-      --accent-glow: rgba(168, 85, 247, 0.35);
-      --bg: #0d0d14;
-      --surface: #13131f;
-      --surface2: #1a1a2e;
-      --text: #e8e8f0;
-      --muted: #8888aa;
+      --accent:       #a855f7;
+      --accent-light: #c084fc;
+      --accent-dark:  #7c3aed;
+      --glow:         rgba(168,85,247,0.35);
+      --bg:           #080810;
+      --surface:      #111120;
+      --surface2:     #181830;
+      --border:       rgba(168,85,247,0.15);
+      --text:         #eeeeff;
+      --muted:        #7777aa;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* ── Background glow ── */
+    /* ── Animated background ── */
     body::before {
       content: "";
       position: fixed;
-      top: -20vh;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80vw;
-      height: 60vh;
-      background: radial-gradient(ellipse, rgba(168,85,247,0.18) 0%, transparent 70%);
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80vw 60vh at 50% -10%, rgba(168,85,247,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40vw 40vh at 80% 80%, rgba(109,40,217,0.07) 0%, transparent 60%);
       pointer-events: none;
       z-index: 0;
     }
 
     /* ── Nav ── */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      height: 60px;
-      background: rgba(13,13,20,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(168,85,247,0.15);
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 62px;
+      background: rgba(8,8,16,0.80);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
     }
-
     .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--text);
-      text-decoration: none;
+      display: flex; align-items: center; gap: 0.6rem;
+      font-weight: 800; font-size: 1.1rem; color: var(--text);
+      text-decoration: none; letter-spacing: -0.02em;
     }
-
-    .nav-logo img { width: 28px; height: 28px; border-radius: 6px; }
-
-    nav ul {
-      display: flex;
-      gap: 1.8rem;
-      list-style: none;
+    .nav-logo img { width: 30px; height: 30px; }
+    nav ul { display: flex; gap: 2rem; list-style: none; }
+    nav a { color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color .18s; }
+    nav a:hover { color: var(--accent-light); }
+    .nav-gh {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.4rem 0.9rem;
+      color: var(--text) !important; font-size: 0.82rem; font-weight: 600;
+      transition: border-color .18s;
     }
-
-    nav a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      transition: color 0.2s;
-    }
-
-    nav a:hover { color: var(--accent); }
+    .nav-gh:hover { border-color: var(--accent); color: var(--accent-light) !important; }
 
     /* ── Hero ── */
     .hero {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 7rem 1.5rem 5rem;
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: 6rem 1.5rem 4rem;
     }
-
-    .hero-icon {
-      width: 96px;
-      height: 96px;
-      border-radius: 20px;
-      box-shadow: 0 0 40px var(--accent-glow);
+    .hero-logo {
+      width: 110px; height: 110px;
+      border-radius: 26px;
+      box-shadow: 0 0 60px rgba(168,85,247,0.5), 0 0 120px rgba(168,85,247,0.2);
       margin-bottom: 2rem;
+      animation: float 4s ease-in-out infinite;
     }
-
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
     .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #fff 30%, var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 900; letter-spacing: -0.04em;
+      background: linear-gradient(140deg, #fff 30%, var(--accent-light) 65%, var(--accent-dark));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       margin-bottom: 1rem;
     }
-
-    .hero p {
-      font-size: 1.15rem;
-      color: var(--muted);
-      max-width: 520px;
-      line-height: 1.7;
-      margin-bottom: 2.5rem;
+    .hero-sub {
+      font-size: 1.15rem; color: var(--muted); max-width: 540px;
+      line-height: 1.75; margin-bottom: 2.5rem;
     }
+    .hero-sub strong { color: var(--accent-light); }
 
-    .btn-group {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
+    .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 3rem; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.6rem;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: transform 0.15s, box-shadow 0.15s;
-      cursor: pointer;
-      border: none;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.8rem 1.8rem; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 700; text-decoration: none;
+      transition: transform .15s, box-shadow .15s;
     }
-
     .btn:hover { transform: translateY(-2px); }
-
     .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 4px 24px var(--accent-glow);
+      background: linear-gradient(135deg, var(--accent-light), var(--accent-dark));
+      color: #fff; box-shadow: 0 4px 28px var(--glow);
     }
-
-    .btn-primary:hover { box-shadow: 0 6px 32px rgba(168,85,247,0.55); }
-
+    .btn-primary:hover { box-shadow: 0 8px 36px rgba(168,85,247,0.6); }
     .btn-secondary {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid rgba(168,85,247,0.25);
+      background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border);
     }
-
     .btn-secondary:hover { border-color: var(--accent); }
 
-    /* ── Badges ── */
-    .badges {
-      display: flex;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 3rem;
+    .platforms {
+      display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center;
+    }
+    .platform-pill {
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+      padding: 0.3rem 0.85rem; border-radius: 999px;
+      background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
     }
 
-    .badge {
-      font-size: 0.75rem;
-      padding: 0.3rem 0.8rem;
-      border-radius: 999px;
-      background: var(--surface2);
-      color: var(--muted);
-      border: 1px solid rgba(168,85,247,0.2);
+    /* ── App mockup ── */
+    .mockup-wrap {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 3rem auto 0; padding: 0 1.5rem;
+    }
+    .mockup-glow {
+      position: absolute; inset: -10%; z-index: -1;
+      background: radial-gradient(ellipse, rgba(168,85,247,0.25) 0%, transparent 70%);
+      filter: blur(30px);
+    }
+    .mockup {
+      border-radius: 16px;
+      border: 1px solid rgba(168,85,247,0.25);
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+      background: #0f0f1e;
+    }
+    /* Title bar */
+    .mockup-bar {
+      height: 36px; background: #0c0c1a;
+      display: flex; align-items: center; gap: 6px; padding: 0 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+    .mockup-title {
+      flex: 1; text-align: center; font-size: 0.72rem; color: rgba(255,255,255,0.25); font-weight: 500;
     }
 
-    /* ── Features ── */
+    /* App layout */
+    .mockup-body { display: flex; height: 460px; }
+
+    /* Sidebar */
+    .mock-sidebar {
+      width: 64px; background: #0a0a18;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 14px 0; gap: 6px;
+    }
+    .mock-logo-small {
+      width: 34px; height: 34px; margin-bottom: 10px;
+    }
+    .mock-nav-item {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.25); font-size: 1.1rem;
+      transition: all .2s;
+    }
+    .mock-nav-item.active {
+      background: rgba(168,85,247,0.2); color: var(--accent-light);
+    }
+    .mock-nav-sep { width: 30px; height: 1px; background: rgba(255,255,255,0.07); margin: 4px 0; }
+
+    /* Main content */
+    .mock-main { flex: 1; padding: 18px; overflow: hidden; }
+    .mock-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .mock-header-title {
+      font-size: 0.95rem; font-weight: 700; color: rgba(255,255,255,0.9);
+    }
+    .mock-header-btn {
+      height: 28px; padding: 0 12px; border-radius: 7px;
+      background: linear-gradient(135deg, #c084fc, #7c3aed);
+      font-size: 0.7rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 5px;
+    }
+
+    /* Instance cards grid */
+    .mock-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .mock-card {
+      border-radius: 11px; padding: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .mock-card.active { border-color: rgba(168,85,247,0.4); background: rgba(168,85,247,0.07); }
+    .mock-card-icon {
+      width: 36px; height: 36px; border-radius: 8px; margin-bottom: 8px;
+      background: linear-gradient(135deg, #4ade80, #16a34a);
+    }
+    .mock-card-icon.b { background: linear-gradient(135deg, #f97316, #c2410c); }
+    .mock-card-icon.c { background: linear-gradient(135deg, #60a5fa, #1d4ed8); }
+    .mock-card-name {
+      font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 3px;
+    }
+    .mock-card-ver { font-size: 0.63rem; color: rgba(255,255,255,0.3); }
+    .mock-card-play {
+      margin-top: 10px; height: 24px; border-radius: 6px;
+      background: linear-gradient(135deg, #a855f7, #6d28d9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; color: #fff;
+    }
+    .mock-card.active .mock-card-play { background: linear-gradient(135deg, #c084fc, #7c3aed); }
+
+    /* Sidebar right panel */
+    .mock-side-panel {
+      width: 200px; padding: 16px; border-left: 1px solid rgba(255,255,255,0.05);
+    }
+    .mock-panel-title { font-size: 0.7rem; color: rgba(255,255,255,0.3); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+    .mock-account {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    }
+    .mock-avatar {
+      width: 32px; height: 32px; border-radius: 6px;
+      background: linear-gradient(135deg, #a855f7, #6d28d9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; color: #fff;
+    }
+    .mock-account-name { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.8); }
+    .mock-account-sub { font-size: 0.62rem; color: rgba(255,255,255,0.3); }
+    .mock-stat { margin-bottom: 8px; }
+    .mock-stat-label { font-size: 0.62rem; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+    .mock-stat-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .mock-stat-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #a855f7, #c084fc); }
+
+    /* ── Section layout ── */
     .section {
-      position: relative;
-      z-index: 1;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 4rem 1.5rem;
+      position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto; padding: 5rem 1.5rem;
     }
-
     .section-title {
-      text-align: center;
-      font-size: 1.9rem;
-      font-weight: 700;
-      margin-bottom: 3rem;
-      letter-spacing: -0.01em;
+      text-align: center; font-size: 2rem; font-weight: 800;
+      letter-spacing: -0.02em; margin-bottom: 0.6rem;
     }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
+    .section-sub {
+      text-align: center; color: var(--muted); font-size: 1rem;
+      max-width: 480px; margin: 0 auto 3rem; line-height: 1.65;
     }
-
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid rgba(168,85,247,0.12);
-      border-radius: 14px;
-      padding: 1.6rem;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-
-    .feature-card:hover {
-      border-color: rgba(168,85,247,0.4);
-      transform: translateY(-3px);
-    }
-
-    .feature-icon {
-      font-size: 1.8rem;
-      margin-bottom: 0.75rem;
-      display: block;
-    }
-
-    .feature-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-
-    .feature-card p {
-      font-size: 0.875rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    /* ── Downloads ── */
-    .downloads {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-    }
-
-    .dl-card {
-      background: var(--surface);
-      border: 1px solid rgba(168,85,247,0.12);
-      border-radius: 14px;
-      padding: 1.6rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-      text-align: center;
-      transition: border-color 0.2s;
-    }
-
-    .dl-card:hover { border-color: rgba(168,85,247,0.4); }
-
-    .dl-icon { font-size: 2.5rem; }
-
-    .dl-card h3 { font-size: 1.05rem; font-weight: 700; }
-
-    .dl-card p { font-size: 0.8rem; color: var(--muted); }
-
-    /* ── Stack ── */
-    .stack {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      justify-content: center;
-    }
-
-    .stack-pill {
-      background: var(--surface2);
-      border: 1px solid rgba(168,85,247,0.2);
-      border-radius: 999px;
-      padding: 0.45rem 1.1rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .stack-pill span { color: var(--accent); font-weight: 600; }
-
-    /* ── Divider ── */
     .divider {
-      height: 1px;
-      background: linear-gradient(to right, transparent, rgba(168,85,247,0.25), transparent);
-      margin: 0 1.5rem;
+      height: 1px; margin: 0 1.5rem;
+      background: linear-gradient(to right, transparent, rgba(168,85,247,0.2), transparent);
     }
+
+    /* ── Feature cards ── */
+    .features {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;
+    }
+    .feat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.8rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .feat-card:hover { border-color: rgba(168,85,247,0.4); transform: translateY(-3px); }
+    .feat-icon {
+      width: 48px; height: 48px; border-radius: 12px; margin-bottom: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; background: rgba(168,85,247,0.12);
+      border: 1px solid rgba(168,85,247,0.2);
+    }
+    .feat-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feat-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── Download cards ── */
+    .downloads { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; }
+    .dl-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center;
+      text-align: center; gap: 0.8rem; transition: border-color .2s, transform .2s;
+    }
+    .dl-card:hover { border-color: rgba(168,85,247,0.4); transform: translateY(-3px); }
+    .dl-os-icon { font-size: 3rem; }
+    .dl-card h3 { font-size: 1.1rem; font-weight: 800; }
+    .dl-formats { font-size: 0.78rem; color: var(--muted); }
+    .dl-btn {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.7rem; border-radius: 10px; font-size: 0.875rem; font-weight: 700;
+      text-decoration: none; background: linear-gradient(135deg, var(--accent-light), var(--accent-dark));
+      color: #fff; box-shadow: 0 4px 20px rgba(168,85,247,0.3);
+      transition: box-shadow .2s, transform .15s;
+    }
+    .dl-btn:hover { box-shadow: 0 6px 28px rgba(168,85,247,0.5); transform: translateY(-1px); }
+
+    /* ── Stack pills ── */
+    .stack { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+    .stack-pill {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 999px;
+      padding: 0.45rem 1.1rem; font-size: 0.85rem; color: var(--muted);
+    }
+    .stack-pill b { color: var(--accent-light); font-weight: 600; }
 
     /* ── Footer ── */
     footer {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      padding: 2.5rem 1.5rem;
-      color: var(--muted);
-      font-size: 0.85rem;
+      position: relative; z-index: 1; text-align: center;
+      padding: 3rem 1.5rem; color: var(--muted); font-size: 0.85rem;
+      border-top: 1px solid var(--border);
     }
-
-    footer a { color: var(--accent); text-decoration: none; }
+    footer a { color: var(--accent-light); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
+    .footer-logo { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .footer-logo img { width: 22px; }
+    .footer-logo span { font-weight: 800; font-size: 0.95rem; color: var(--text); }
   </style>
 </head>
 <body>
 
   <nav>
     <a class="nav-logo" href="#">
-      <img src="icon.png" alt="Nova" />
+      <img src="icon.svg" alt="Nova" />
       Nova Launcher
     </a>
     <ul>
+      <li><a href="#preview">Preview</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#download">Download</a></li>
-      <li><a href="https://github.com/partymaster64/nova-launcher" target="_blank">GitHub</a></li>
+      <li><a href="https://github.com/partymaster64/nova-launcher" target="_blank" class="nav-gh">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a></li>
     </ul>
   </nav>
 
-  <!-- Hero -->
+  <!-- ── Hero ── -->
   <section class="hero">
-    <img class="hero-icon" src="icon.png" alt="Nova Launcher" />
-    <div class="badges">
-      <span class="badge">Linux</span>
-      <span class="badge">Windows</span>
-      <span class="badge">macOS</span>
-      <span class="badge">Tauri 2</span>
-      <span class="badge">Open Source</span>
+    <img class="hero-logo" src="icon.svg" alt="Nova Launcher" />
+    <div class="platforms">
+      <span class="platform-pill">Linux</span>
+      <span class="platform-pill">Windows</span>
+      <span class="platform-pill">macOS</span>
+      <span class="platform-pill">Tauri 2</span>
+      <span class="platform-pill">Open Source</span>
     </div>
     <h1>Nova Launcher</h1>
-    <p>A fast, beautiful Minecraft launcher. Manage instances, browse Modrinth, launch any version — all in one place.</p>
-    <div class="btn-group">
+    <p class="hero-sub">
+      A <strong>fast, beautiful</strong> Minecraft launcher.<br/>
+      Manage instances, browse Modrinth, launch any version — all in one place.
+    </p>
+    <div class="btn-row">
       <a class="btn btn-primary" href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">
-        &#8595; Download
+        ↓ Download
       </a>
       <a class="btn btn-secondary" href="https://github.com/partymaster64/nova-launcher" target="_blank">
-        View on GitHub
+        View Source
       </a>
     </div>
   </section>
 
+  <!-- ── App mockup ── -->
+  <div class="mockup-wrap" id="preview">
+    <div class="mockup-glow"></div>
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="dot dot-r"></span>
+        <span class="dot dot-y"></span>
+        <span class="dot dot-g"></span>
+        <span class="mockup-title">Nova Launcher</span>
+      </div>
+      <div class="mockup-body">
+        <!-- Sidebar icons -->
+        <div class="mock-sidebar">
+          <img class="mock-logo-small" src="icon.svg" alt="" />
+          <div class="mock-nav-item active">⌂</div>
+          <div class="mock-nav-item">▤</div>
+          <div class="mock-nav-item">⬇</div>
+          <div class="mock-nav-sep"></div>
+          <div class="mock-nav-item">♟</div>
+          <div class="mock-nav-item">✦</div>
+          <div class="mock-nav-sep"></div>
+          <div class="mock-nav-item">⚙</div>
+          <div class="mock-nav-item">👤</div>
+        </div>
+
+        <!-- Main area -->
+        <div class="mock-main">
+          <div class="mock-header">
+            <span class="mock-header-title">My Instances</span>
+            <span class="mock-header-btn">+ New Instance</span>
+          </div>
+          <div class="mock-grid">
+            <div class="mock-card active">
+              <div class="mock-card-icon"></div>
+              <div class="mock-card-name">Survival World</div>
+              <div class="mock-card-ver">Minecraft 1.21.4</div>
+              <div class="mock-card-play">▶ Play</div>
+            </div>
+            <div class="mock-card">
+              <div class="mock-card-icon b"></div>
+              <div class="mock-card-name">Modpack SMP</div>
+              <div class="mock-card-ver">Fabric 1.21.1 · 47 Mods</div>
+              <div class="mock-card-play">▶ Play</div>
+            </div>
+            <div class="mock-card">
+              <div class="mock-card-icon c"></div>
+              <div class="mock-card-name">Creative Lab</div>
+              <div class="mock-card-ver">Minecraft 1.20.6</div>
+              <div class="mock-card-play">▶ Play</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel -->
+        <div class="mock-side-panel">
+          <div class="mock-panel-title">Account</div>
+          <div class="mock-account">
+            <div class="mock-avatar">N</div>
+            <div>
+              <div class="mock-account-name">Player</div>
+              <div class="mock-account-sub">Microsoft ✓</div>
+            </div>
+          </div>
+          <div class="mock-panel-title" style="margin-top:14px">System</div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">RAM – 8 GB allocated</div>
+            <div class="mock-stat-bar"><div class="mock-stat-fill" style="width:65%"></div></div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Java 21</div>
+            <div class="mock-stat-bar"><div class="mock-stat-fill" style="width:100%;background:linear-gradient(90deg,#4ade80,#16a34a)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top:2rem; padding-bottom:2rem; text-align:center">
+    <p style="color:var(--muted);font-size:0.8rem">UI preview — actual app may vary</p>
+  </div>
+
   <div class="divider"></div>
 
-  <!-- Features -->
+  <!-- ── Features ── -->
   <section class="section" id="features">
     <h2 class="section-title">Everything you need</h2>
+    <p class="section-sub">Nova Launcher packs every feature a Minecraft player needs into a sleek, native app.</p>
     <div class="features">
-      <div class="feature-card">
-        <span class="feature-icon">&#128274;</span>
+      <div class="feat-card">
+        <div class="feat-icon">🔐</div>
         <h3>Microsoft Login</h3>
-        <p>Secure OAuth2 device-code flow. Credentials stored in your OS keystore — never in plain text.</p>
+        <p>OAuth2 device-code flow with credentials stored securely in your OS native keystore — never in plain text.</p>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">&#128194;</span>
+      <div class="feat-card">
+        <div class="feat-icon">📦</div>
         <h3>Instance Management</h3>
-        <p>Multiple isolated instances with their own versions, mods and settings. Switch in one click.</p>
+        <p>Run multiple isolated Minecraft instances with their own versions, mods, saves and settings. Switch instantly.</p>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">&#127757;</span>
+      <div class="feat-card">
+        <div class="feat-icon">🌍</div>
         <h3>Modrinth Integration</h3>
-        <p>Browse and install mods, modpacks and resource packs directly from Modrinth without leaving the launcher.</p>
+        <p>Browse, install and update mods, modpacks and resource packs from Modrinth without leaving the launcher.</p>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">&#128126;</span>
+      <div class="feat-card">
+        <div class="feat-icon">🧑‍🎤</div>
         <h3>Skin Manager</h3>
-        <p>Live 3D preview of your skin powered by skinview3d. Upload and switch skins on the fly.</p>
+        <p>Live 3D preview of your Minecraft skin powered by skinview3d. Upload and switch skins with one click.</p>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">&#127918;</span>
+      <div class="feat-card">
+        <div class="feat-icon">🎮</div>
         <h3>Discord Rich Presence</h3>
-        <p>Automatically shows what you are playing in your Discord status while a game is running.</p>
+        <p>Automatically shows what you are playing in your Discord status whenever a game session is active.</p>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">&#127760;</span>
+      <div class="feat-card">
+        <div class="feat-icon">🔄</div>
+        <h3>World & Save Sync</h3>
+        <p>Sync saves, resource packs and screenshots across all instances via smart symlinks. One world, every instance.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">☕</div>
+        <h3>Java Management</h3>
+        <p>Auto-detects installed Java versions and downloads the right JRE for each Minecraft version automatically.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🌐</div>
         <h3>Multilingual</h3>
-        <p>Available in German, English and French. More languages can be added via simple JSON locale files.</p>
+        <p>Available in German, English and French. Add more languages via simple JSON locale files.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <h3>Native Performance</h3>
+        <p>Built with Tauri 2 and Rust. Minimal memory footprint, instant startup — no Electron overhead.</p>
       </div>
     </div>
   </section>
 
   <div class="divider"></div>
 
-  <!-- Downloads -->
+  <!-- ── Download ── -->
   <section class="section" id="download">
     <h2 class="section-title">Download</h2>
+    <p class="section-sub">Available as a native installer for all major platforms. No Java required to run the launcher itself.</p>
     <div class="downloads">
       <div class="dl-card">
-        <span class="dl-icon">&#128039;</span>
+        <span class="dl-os-icon">🐧</span>
         <h3>Linux</h3>
-        <p>.AppImage · .deb</p>
-        <a class="btn btn-primary" style="width:100%;justify-content:center"
-           href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">Download</a>
+        <p class="dl-formats">.AppImage &nbsp;·&nbsp; .deb</p>
+        <a class="dl-btn" href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">↓ Download</a>
       </div>
       <div class="dl-card">
-        <span class="dl-icon">&#129695;</span>
+        <span class="dl-os-icon">🪟</span>
         <h3>Windows</h3>
-        <p>Setup .exe · .msi</p>
-        <a class="btn btn-primary" style="width:100%;justify-content:center"
-           href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">Download</a>
+        <p class="dl-formats">Setup .exe &nbsp;·&nbsp; .msi</p>
+        <a class="dl-btn" href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">↓ Download</a>
       </div>
       <div class="dl-card">
-        <span class="dl-icon">&#127822;</span>
+        <span class="dl-os-icon">🍎</span>
         <h3>macOS</h3>
-        <p>.dmg · Universal Binary</p>
-        <a class="btn btn-primary" style="width:100%;justify-content:center"
-           href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">Download</a>
+        <p class="dl-formats">.dmg &nbsp;·&nbsp; Universal Binary</p>
+        <a class="dl-btn" href="https://github.com/partymaster64/nova-launcher/releases" target="_blank">↓ Download</a>
       </div>
     </div>
   </section>
 
   <div class="divider"></div>
 
-  <!-- Stack -->
+  <!-- ── Stack ── -->
   <section class="section">
     <h2 class="section-title">Built with</h2>
+    <p class="section-sub">A modern, lightweight stack — no Electron, no bloat.</p>
     <div class="stack">
-      <div class="stack-pill"><span>Tauri 2</span> — native shell</div>
-      <div class="stack-pill"><span>Rust</span> — backend logic</div>
-      <div class="stack-pill"><span>Svelte 4</span> — UI framework</div>
-      <div class="stack-pill"><span>Vite 5</span> — frontend build</div>
-      <div class="stack-pill"><span>reqwest</span> — HTTP client</div>
-      <div class="stack-pill"><span>skinview3d</span> — 3D skin preview</div>
-      <div class="stack-pill"><span>keyring</span> — native credential storage</div>
+      <div class="stack-pill"><b>Tauri 2</b> — native shell</div>
+      <div class="stack-pill"><b>Rust</b> — backend</div>
+      <div class="stack-pill"><b>Svelte 4</b> — UI</div>
+      <div class="stack-pill"><b>Vite 5</b> — build</div>
+      <div class="stack-pill"><b>reqwest</b> — HTTP</div>
+      <div class="stack-pill"><b>skinview3d</b> — 3D skin preview</div>
+      <div class="stack-pill"><b>keyring</b> — native credential storage</div>
+      <div class="stack-pill"><b>tokio</b> — async runtime</div>
     </div>
   </section>
 
   <footer>
-    <p>Nova Launcher &mdash; Open Source under the MIT License &mdash;
+    <div class="footer-logo">
+      <img src="icon.svg" alt="" />
+      <span>Nova Launcher</span>
+    </div>
+    <p>Open Source under the MIT License &mdash;
       <a href="https://github.com/partymaster64/nova-launcher" target="_blank">GitHub</a>
     </p>
   </footer>

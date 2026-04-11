@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="star-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0abfc"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#5b21b6"/>
+    </linearGradient>
+    <radialGradient id="bg-glow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#3b0764" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#0d0d14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+
+  <!-- App icon background -->
+  <rect width="512" height="512" rx="96" fill="#0d0d14"/>
+
+  <!-- Radial bg glow -->
+  <circle cx="256" cy="256" r="260" fill="url(#bg-glow)"/>
+
+  <!-- Blurred star for glow effect -->
+  <path d="M256,58 Q312,206 454,256 Q312,306 256,454 Q200,306 58,256 Q200,206 256,58Z"
+        fill="#a855f7" filter="url(#blur-glow)" opacity="0.65"/>
+
+  <!-- Main 4-pointed nova star -->
+  <path d="M256,58 Q312,206 454,256 Q312,306 256,454 Q200,306 58,256 Q200,206 256,58Z"
+        fill="url(#star-grad)"/>
+
+  <!-- Inner white highlight star -->
+  <path d="M256,156 Q272,236 318,256 Q272,276 256,356 Q240,276 194,256 Q240,236 256,156Z"
+        fill="white" opacity="0.92"/>
+
+  <!-- Tiny center dot -->
+  <circle cx="256" cy="256" r="14" fill="white"/>
+</svg>
