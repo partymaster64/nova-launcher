@@ -218,14 +218,16 @@
   <!-- Logo -->
   <div class="logo">
     <div class="logo-icon">
-      <svg viewBox="0 0 160 160" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4"  y="4"  width="152" height="152" rx="18" fill="var(--ni-1)"/>
-        <rect x="16" y="16" width="128" height="128" rx="16" fill="var(--ni-2)"/>
-        <rect x="28" y="28" width="104" height="104" rx="14" fill="var(--ni-3)"/>
-        <rect x="40" y="40" width="80"  height="80"  rx="12" fill="var(--ni-4)"/>
-        <rect x="52" y="52" width="56"  height="56"  rx="10" fill="var(--ni-5)"/>
-        <rect x="64" y="64" width="32"  height="32"  rx="7"  fill="var(--ni-6)"/>
-        <rect x="73" y="73" width="14"  height="14"  rx="4"  fill="var(--ni-7)"/>
+      <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="nova-logo-g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="color-mix(in srgb, var(--accent) 55%, white)"/>
+            <stop offset="100%" stop-color="var(--accent)"/>
+          </linearGradient>
+        </defs>
+        <path d="M50,7 Q60,40 93,50 Q60,60 50,93 Q40,60 7,50 Q40,40 50,7Z" fill="url(#nova-logo-g)"/>
+        <path d="M50,27 Q55,45 70,50 Q55,55 50,73 Q45,55 30,50 Q45,45 50,27Z" fill="white" opacity="0.88"/>
+        <circle cx="50" cy="50" r="4" fill="white"/>
       </svg>
     </div>
     <div class="logo-text-wrap">
@@ -423,13 +425,6 @@
   .logo-icon {
     width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    --ni-1: color-mix(in srgb, var(--accent) 18%, black);
-    --ni-2: color-mix(in srgb, var(--accent) 32%, black);
-    --ni-3: color-mix(in srgb, var(--accent) 52%, black);
-    --ni-4: var(--accent);
-    --ni-5: color-mix(in srgb, var(--accent) 60%, white);
-    --ni-6: color-mix(in srgb, var(--accent) 35%, white);
-    --ni-7: color-mix(in srgb, var(--accent) 14%, white);
   }
   .logo-text-wrap { display: flex; flex-direction: column; gap: 0; line-height: 1.1; }
   .logo-name { font-size: 15px; font-weight: 800; color: var(--accent); letter-spacing: -0.01em; }
