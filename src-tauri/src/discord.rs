@@ -2,7 +2,9 @@
 /// Works on Linux with native, Flatpak and Snap Discord installs,
 /// on macOS and on Windows (named pipe).
 use std::time::{SystemTime, UNIX_EPOCH};
+#[cfg(unix)]
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
+#[cfg(unix)]
 use tracing::warn;
 
 #[derive(Debug, Clone)]
@@ -104,6 +106,7 @@ async fn read_packet(stream: &mut tokio::net::UnixStream) -> std::io::Result<Vec
 
 // ─── JSON helpers ─────────────────────────────────────────────────────────────
 
+#[cfg(unix)]
 fn escape(s: &str) -> String {
     s.replace('\\', "\\\\")
         .replace('"', "\\\"")
@@ -111,6 +114,7 @@ fn escape(s: &str) -> String {
         .replace('\r', "\\r")
 }
 
+#[cfg(unix)]
 fn nonce() -> String {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -118,6 +122,7 @@ fn nonce() -> String {
         .unwrap_or_else(|_| "0".to_string())
 }
 
+#[cfg(unix)]
 fn activity_json(a: &Activity) -> String {
     let mut parts = Vec::new();
     if let Some(d) = &a.details { parts.push(format!(r#""details":"{}""#, escape(d))); }
@@ -137,6 +142,7 @@ fn activity_json(a: &Activity) -> String {
     format!("{{{}}}", parts.join(","))
 }
 
+#[cfg(unix)]
 fn set_activity_payload(a: &Activity) -> String {
     format!(
         r#"{{"cmd":"SET_ACTIVITY","args":{{"pid":{},"activity":{}}},"nonce":"{}"}}"#,
@@ -146,6 +152,7 @@ fn set_activity_payload(a: &Activity) -> String {
     )
 }
 
+#[cfg(unix)]
 fn clear_activity_payload() -> String {
     format!(
         r#"{{"cmd":"SET_ACTIVITY","args":{{"pid":{},"activity":null}},"nonce":"{}"}}"#,
