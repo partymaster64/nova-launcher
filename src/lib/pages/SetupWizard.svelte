@@ -407,19 +407,6 @@
 
   // ── Reactive ──────────────────────────────────────────────────────────────────
 
-  // Logo colors computed in JS to avoid color-mix()+var() in SVG fill (WebKitGTK freeze bug)
-  $: logoColors = (() => {
-    const hex = accentHex || '#a855f7'
-    return [
-      blendColors('#000000', hex, 0.18),
-      blendColors('#000000', hex, 0.32),
-      blendColors('#000000', hex, 0.52),
-      hex,
-      blendColors('#ffffff', hex, 0.6),
-      blendColors('#ffffff', hex, 0.35),
-      blendColors('#ffffff', hex, 0.14),
-    ]
-  })()
 
   // svelte tick
   function tick() { return new Promise(r => setTimeout(r, 0)) }
@@ -438,14 +425,20 @@
   <!-- Top bar -->
   <div class="top-bar">
     <div class="top-logo">
-      <svg viewBox="0 0 160 160" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4"  y="4"  width="152" height="152" rx="18" fill={logoColors[0]}/>
-        <rect x="16" y="16" width="128" height="128" rx="16" fill={logoColors[1]}/>
-        <rect x="28" y="28" width="104" height="104" rx="14" fill={logoColors[2]}/>
-        <rect x="40" y="40" width="80"  height="80"  rx="12" fill={logoColors[3]}/>
-        <rect x="52" y="52" width="56"  height="56"  rx="10" fill={logoColors[4]}/>
-        <rect x="64" y="64" width="32"  height="32"  rx="7"  fill={logoColors[5]}/>
-        <rect x="73" y="73" width="14"  height="14"  rx="4"  fill={logoColors[6]}/>
+      <svg viewBox="0 0 100 100" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sw-top-sg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"   stop-color="#f0abfc"/>
+            <stop offset="50%"  stop-color="#a855f7"/>
+            <stop offset="100%" stop-color="#5b21b6"/>
+          </linearGradient>
+        </defs>
+        <path d="M50,50 Q40,40 50,7  Q60,40 50,50Z" fill="url(#sw-top-sg)"/>
+        <path d="M50,50 Q60,40 93,50 Q60,60 50,50Z" fill="url(#sw-top-sg)"/>
+        <path d="M50,50 Q60,60 50,93 Q40,60 50,50Z" fill="url(#sw-top-sg)"/>
+        <path d="M50,50 Q40,60 7,50  Q40,40 50,50Z" fill="url(#sw-top-sg)"/>
+        <path d="M50,27 Q55,45 70,50 Q55,55 50,73 Q45,55 30,50 Q45,45 50,27Z" fill="white" opacity="0.9"/>
+        <circle cx="50" cy="50" r="4.5" fill="white"/>
       </svg>
       <span class="top-logo-name">Nova Launcher</span>
     </div>
@@ -465,14 +458,24 @@
         <div class="welcome-wrap">
           <div class="welcome-logo" class:visible={showLogo}>
             <div class="welcome-logo-icon">
-              <svg viewBox="0 0 160 160" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-                <rect x="4"  y="4"  width="152" height="152" rx="18" fill={logoColors[0]}/>
-                <rect x="16" y="16" width="128" height="128" rx="16" fill={logoColors[1]}/>
-                <rect x="28" y="28" width="104" height="104" rx="14" fill={logoColors[2]}/>
-                <rect x="40" y="40" width="80"  height="80"  rx="12" fill={logoColors[3]}/>
-                <rect x="52" y="52" width="56"  height="56"  rx="10" fill={logoColors[4]}/>
-                <rect x="64" y="64" width="32"  height="32"  rx="7"  fill={logoColors[5]}/>
-                <rect x="73" y="73" width="14"  height="14"  rx="4"  fill={logoColors[6]}/>
+              <svg viewBox="0 0 100 100" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="sw-wlc-sg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%"   stop-color="#f0abfc"/>
+                    <stop offset="50%"  stop-color="#a855f7"/>
+                    <stop offset="100%" stop-color="#5b21b6"/>
+                  </linearGradient>
+                </defs>
+                <g class="sw-star">
+                  <path class="sw-p sw-pn" d="M50,50 Q40,40 50,7  Q60,40 50,50Z" fill="url(#sw-wlc-sg)"/>
+                  <path class="sw-p sw-pe" d="M50,50 Q60,40 93,50 Q60,60 50,50Z" fill="url(#sw-wlc-sg)"/>
+                  <path class="sw-p sw-ps" d="M50,50 Q60,60 50,93 Q40,60 50,50Z" fill="url(#sw-wlc-sg)"/>
+                  <path class="sw-p sw-pw" d="M50,50 Q40,60 7,50  Q40,40 50,50Z" fill="url(#sw-wlc-sg)"/>
+                  <path class="sw-inner"
+                    d="M50,27 Q55,45 70,50 Q55,55 50,73 Q45,55 30,50 Q45,45 50,27Z"
+                    fill="white" opacity="0.9"/>
+                  <circle class="sw-dot" cx="50" cy="50" r="4.5" fill="white"/>
+                </g>
               </svg>
             </div>
           </div>
@@ -833,6 +836,18 @@
     background: rgba(255,255,255,0.04);
     box-shadow: 0 8px 48px rgba(0,0,0,0.45);
   }
+  .sw-p { transform-box: fill-box; animation: swPetalIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .sw-pn { transform-origin: center bottom; animation-delay: 0.00s; }
+  .sw-pe { transform-origin: left   center; animation-delay: 0.08s; }
+  .sw-ps { transform-origin: center top;    animation-delay: 0.16s; }
+  .sw-pw { transform-origin: right  center; animation-delay: 0.24s; }
+  @keyframes swPetalIn { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1); } }
+  .sw-inner { transform-box: fill-box; transform-origin: center; animation: swInnerIn 0.3s ease-out 0.4s both; }
+  @keyframes swInnerIn { from { opacity: 0; transform: scale(0.15); } to { opacity: 0.9; transform: scale(1); } }
+  .sw-dot { transform-box: fill-box; transform-origin: center; animation: swDotIn 0.25s ease-out 0.6s both; }
+  @keyframes swDotIn { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+  .sw-star { transform-box: fill-box; transform-origin: center; animation: swStarPulse 2.6s ease-in-out 0.8s infinite; }
+  @keyframes swStarPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.93); opacity: 0.8; } }
   .welcome-h1 {
     font-size: 2.8rem;
     font-weight: 800;

@@ -729,15 +729,57 @@ fn system_java_search_paths(version: u32) -> Vec<String> {
         paths.push(format!("/usr/lib/jvm/java-{}-amazon-corretto/bin/{}", v, java_exe));
         if let Some(home) = dirs::home_dir() {
             let sdkman = home.join(".sdkman").join("candidates").join("java");
-            paths.push(sdkman.join(format!("{}", v)).join("bin").join(java_exe).to_string_lossy().into_owned());
+            paths.push(sdkman.join(v.clone()).join("bin").join(java_exe).to_string_lossy().into_owned());
         }
     } else if cfg!(target_os = "macos") {
+        // Scan /Library/Java/JavaVirtualMachines/ for any JVM matching the version
+        let jvm_root = std::path::Path::new("/Library/Java/JavaVirtualMachines");
+        if let Ok(entries) = std::fs::read_dir(jvm_root) {
+            for entry in entries.flatten() {
+                let name = entry.file_name().to_string_lossy().to_string();
+                // Match entries like temurin-8.jdk, adoptopenjdk-8.jdk, zulu-8.jdk,
+                // amazon-corretto-8.jdk, jdk-8.jdk, jdk1.8.0_xxx.jdk, etc.
+                let matches = name.contains(&format!("-{}", v))
+                    || name.contains(&format!("jdk-{}", v))
+                    || name.contains(&format!("jdk1.{}", v))  // Java 8 = jdk1.8.0_xxx
+                    || name.starts_with(&format!("jdk{}", v));
+                if matches {
+                    let java_bin = entry.path()
+                        .join("Contents").join("Home").join("bin").join(java_exe);
+                    paths.push(java_bin.to_string_lossy().into_owned());
+                }
+            }
+        }
+        // Explicit well-known paths as fallback
         paths.push(format!("/Library/Java/JavaVirtualMachines/temurin-{}.jdk/Contents/Home/bin/{}", v, java_exe));
+        paths.push(format!("/Library/Java/JavaVirtualMachines/adoptopenjdk-{}.jdk/Contents/Home/bin/{}", v, java_exe));
+        paths.push(format!("/Library/Java/JavaVirtualMachines/zulu-{}.jdk/Contents/Home/bin/{}", v, java_exe));
+        paths.push(format!("/Library/Java/JavaVirtualMachines/amazon-corretto-{}.jdk/Contents/Home/bin/{}", v, java_exe));
         paths.push(format!("/Library/Java/JavaVirtualMachines/jdk-{}.jdk/Contents/Home/bin/{}", v, java_exe));
+        // Homebrew (Intel + Apple Silicon)
         paths.push(format!("/usr/local/opt/openjdk@{}/bin/{}", v, java_exe));
         paths.push(format!("/opt/homebrew/opt/openjdk@{}/bin/{}", v, java_exe));
+        // SDKMAN (macOS users)
+        if let Some(home) = dirs::home_dir() {
+            let sdkman = home.join(".sdkman").join("candidates").join("java");
+            paths.push(sdkman.join(v.clone()).join("bin").join(java_exe).to_string_lossy().into_owned());
+        }
     } else {
-        // Windows
+        // Windows — scan Program Files for Eclipse Adoptium / Temurin / Corretto
+        for root in &["C:\\Program Files\\Eclipse Adoptium", "C:\\Program Files\\Java",
+                      "C:\\Program Files\\Microsoft", "C:\\Program Files\\Amazon Corretto"] {
+            let root_path = std::path::Path::new(root);
+            if let Ok(entries) = std::fs::read_dir(root_path) {
+                for entry in entries.flatten() {
+                    let name = entry.file_name().to_string_lossy().to_string();
+                    if name.contains(&v) {
+                        let java_bin = entry.path().join("bin").join(java_exe);
+                        paths.push(java_bin.to_string_lossy().into_owned());
+                    }
+                }
+            }
+        }
+        // Explicit fallbacks
         paths.push(format!("C:\\Program Files\\Eclipse Adoptium\\jre-{}.0.0+0-hotspot\\bin\\{}", v, java_exe));
         paths.push(format!("C:\\Program Files\\Java\\jre{}\\bin\\{}", v, java_exe));
     }
@@ -838,11 +880,17 @@ async fn install_java(version: u32, state: State<'_, AppState>) -> Result<String
         .ok_or_else(|| format!("Keine Java {}-JRE für {}/{} gefunden", version, os_str, arch_str))?
         .binary.package.link;
 
-    let install_dir = java_install_dir().join(version.to_string());
+    // Ensure the parent java dir and the version-specific dir both exist
+    let java_base = java_install_dir();
+    tokio::fs::create_dir_all(&java_base).await
+        .map_err(|e| format!("Java-Basisverzeichnis konnte nicht erstellt werden: {e}"))?;
+    let install_dir = java_base.join(version.to_string());
     tokio::fs::create_dir_all(&install_dir).await
-        .map_err(|e| format!("Verzeichnis konnte nicht erstellt werden: {e}"))?;
+        .map_err(|e| format!("Installationsverzeichnis konnte nicht erstellt werden: {e}"))?;
 
-    let tmp = java_install_dir().join(format!("jre-{}.tmp", version));
+    let is_zip = link.ends_with(".zip");
+    let tmp_ext = if is_zip { "zip" } else { "tar.gz" };
+    let tmp = java_base.join(format!("jre-{}.tmp.{}", version, tmp_ext));
     let mut resp = state.http.get(&link).send().await
         .map_err(|e| format!("Download fehlgeschlagen: {e}"))?;
     {
@@ -853,15 +901,39 @@ async fn install_java(version: u32, state: State<'_, AppState>) -> Result<String
         }
     }
 
-    let tar_out = tokio::process::Command::new("tar")
-        .arg("xzf").arg(&tmp)
-        .arg("-C").arg(&install_dir)
-        .arg("--strip-components=1")
-        .output().await
-        .map_err(|e| format!("tar konnte nicht gestartet werden: {e}"))?;
-    let _ = tokio::fs::remove_file(&tmp).await;
-    if !tar_out.status.success() {
-        return Err(format!("Entpacken fehlgeschlagen: {}", String::from_utf8_lossy(&tar_out.stderr)));
+    #[cfg(windows)]
+    {
+        // On Windows, Adoptium ships .zip archives — use PowerShell Expand-Archive
+        let ps_script = format!(
+            "Expand-Archive -LiteralPath '{}' -DestinationPath '{}' -Force; \
+             $inner = Get-ChildItem '{}' | Where-Object {{ $_.PSIsContainer }} | Select-Object -First 1; \
+             if ($inner) {{ Get-ChildItem $inner.FullName | Move-Item -Destination '{}' }}",
+            tmp.display(),
+            install_dir.display(),
+            install_dir.display(),
+            install_dir.display(),
+        );
+        let ps_out = tokio::process::Command::new("powershell")
+            .args(["-NoProfile", "-Command", &ps_script])
+            .output().await
+            .map_err(|e| format!("PowerShell konnte nicht gestartet werden: {e}"))?;
+        let _ = tokio::fs::remove_file(&tmp).await;
+        if !ps_out.status.success() {
+            return Err(format!("Entpacken fehlgeschlagen: {}", String::from_utf8_lossy(&ps_out.stderr)));
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        let tar_out = tokio::process::Command::new("tar")
+            .arg("xzf").arg(&tmp)
+            .arg("-C").arg(&install_dir)
+            .arg("--strip-components=1")
+            .output().await
+            .map_err(|e| format!("tar konnte nicht gestartet werden: {e}"))?;
+        let _ = tokio::fs::remove_file(&tmp).await;
+        if !tar_out.status.success() {
+            return Err(format!("Entpacken fehlgeschlagen: {}", String::from_utf8_lossy(&tar_out.stderr)));
+        }
     }
 
     let java_path = install_dir.join("bin").join(java_exe).to_string_lossy().into_owned();
@@ -3822,6 +3894,7 @@ pub fn run() {
     let accounts = AccountStore::load().unwrap_or_default();
     let http = reqwest::Client::builder()
         .user_agent("NovaLauncher/0.1.0")
+        .connect_timeout(std::time::Duration::from_secs(30))
         .build()
         .expect("HTTP Client konnte nicht erstellt werden");
 
@@ -3846,6 +3919,8 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .manage(state)
         .setup(|app| {
             // .setup() runs inside the Tokio runtime — safe to spawn tasks here

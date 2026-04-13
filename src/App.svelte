@@ -14,11 +14,13 @@
   import SkinManager from './lib/pages/SkinManager.svelte'
   import SetupWizard from './lib/pages/SetupWizard.svelte'
   import CrashModal from './lib/components/CrashModal.svelte'
+  import UpdateModal from './lib/components/UpdateModal.svelte'
+  import { check as checkUpdate } from '@tauri-apps/plugin-updater'
 
   import { config, accounts, manifest, currentPage, instanceLaunchStates, instanceLogs, instanceUpdates, crashEvent, showSetupWizard } from './store.js'
 
   let page = 'home'
-  let appLoading = false
+  let pendingUpdate = null
   let cfg = null
   config.subscribe(v => { cfg = v })
   currentPage.subscribe(v => (page = v))
@@ -120,10 +122,18 @@
       if (!cfg.setup_complete) {
         showSetupWizard.set(true)
       }
+      // Check for app updates in the background (only in production builds)
+      if (!import.meta.env.DEV) {
+        setTimeout(async () => {
+          try {
+            const update = await checkUpdate()
+            if (update) pendingUpdate = update
+          } catch (_) {}
+        }, 3000)
+      }
     } catch (e) {
       console.error('Init error:', e)
     } finally {
-      appLoading = false
       // Close the native splashscreen window and reveal the main window
       invoke('close_splashscreen').catch(() => {})
     }
@@ -260,6 +270,10 @@
 
 {#if $crashEvent}
   <CrashModal instanceId={$crashEvent.instanceId} instanceName={$crashEvent.instanceName} error={$crashEvent.error} />
+{/if}
+
+{#if pendingUpdate}
+  <UpdateModal update={pendingUpdate} on:close={() => pendingUpdate = null} />
 {/if}
 
 {#if page === 'setup'}

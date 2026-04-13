@@ -40,6 +40,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -48,5 +49,16 @@
       "icons/icon.icns",
       "icons/icon.png"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCM0VDNzZFNEY2MkJGRDYKUldUV3YySlBic2MrT3lVbk1WSDc3VW1wZkV2eHlTNmc5a1V5YjRiMWtuVWdHWG1qaWpiaXRqdnYK",
+      "endpoints": [
+        "https://github.com/partymaster64/nova-launcher/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

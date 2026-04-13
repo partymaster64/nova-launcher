@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-process": "^2.3.1",
     "@tauri-apps/plugin-shell": "^2",
-    "three": "^0.170.0",
-    "skinview3d": "^2.2.0"
+    "@tauri-apps/plugin-updater": "^2.10.1",
+    "skinview3d": "^2.2.0",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3",

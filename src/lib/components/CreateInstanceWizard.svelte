@@ -276,16 +276,24 @@
         {:else}
           <div class="install-progress">
             <div class="wiz-logo-wrap">
-              <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"
-                style="--ni-1:color-mix(in srgb,var(--accent) 18%,black);--ni-2:color-mix(in srgb,var(--accent) 32%,black);--ni-3:color-mix(in srgb,var(--accent) 52%,black);--ni-4:var(--accent);--ni-5:color-mix(in srgb,var(--accent) 60%,white);--ni-6:color-mix(in srgb,var(--accent) 35%,white);--ni-7:color-mix(in srgb,var(--accent) 14%,white);"
-              >
-                <rect class="wr wr1" x="4"  y="4"  width="152" height="152" rx="18" fill="var(--ni-1)"/>
-                <rect class="wr wr2" x="16" y="16" width="128" height="128" rx="16" fill="var(--ni-2)"/>
-                <rect class="wr wr3" x="28" y="28" width="104" height="104" rx="14" fill="var(--ni-3)"/>
-                <rect class="wr wr4" x="40" y="40" width="80"  height="80"  rx="12" fill="var(--ni-4)"/>
-                <rect class="wr wr5" x="52" y="52" width="56"  height="56"  rx="10" fill="var(--ni-5)"/>
-                <rect class="wr wr6" x="64" y="64" width="32"  height="32"  rx="7"  fill="var(--ni-6)"/>
-                <rect class="wr wr7" x="73" y="73" width="14"  height="14"  rx="4"  fill="var(--ni-7)"/>
+              <svg viewBox="0 0 100 100" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="ciw-sg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%"   stop-color="#f0abfc"/>
+                    <stop offset="50%"  stop-color="#a855f7"/>
+                    <stop offset="100%" stop-color="#5b21b6"/>
+                  </linearGradient>
+                </defs>
+                <g class="wiz-star">
+                  <path class="wp wpn" d="M50,50 Q40,40 50,7  Q60,40 50,50Z" fill="url(#ciw-sg)"/>
+                  <path class="wp wpe" d="M50,50 Q60,40 93,50 Q60,60 50,50Z" fill="url(#ciw-sg)"/>
+                  <path class="wp wps" d="M50,50 Q60,60 50,93 Q40,60 50,50Z" fill="url(#ciw-sg)"/>
+                  <path class="wp wpw" d="M50,50 Q40,60 7,50  Q40,40 50,50Z" fill="url(#ciw-sg)"/>
+                  <path class="wiz-inner"
+                    d="M50,27 Q55,45 70,50 Q55,55 50,73 Q45,55 30,50 Q45,45 50,27Z"
+                    fill="white" opacity="0.9"/>
+                  <circle class="wiz-dot" cx="50" cy="50" r="4.5" fill="white"/>
+                </g>
               </svg>
             </div>
             <div class="install-step">{installStep || $t('createInstance.titleCreating')}</div>
@@ -564,31 +572,33 @@
   }
 
   .wiz-logo-wrap {
-    width: 96px; height: 96px;
     display: flex; align-items: center; justify-content: center;
     margin-bottom: 8px;
     animation: wizFloat 3s ease-in-out 1.2s infinite;
   }
-  .wiz-logo-wrap svg { width: 96px; height: 96px; }
 
   @keyframes wizFloat {
     0%, 100% { transform: translateY(0); }
     50%       { transform: translateY(-5px); }
   }
 
-  .wr {
-    transform-box: fill-box; transform-origin: center;
-    animation: wizBuild 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  }
-  .wr7 { animation-delay: 0.00s; } .wr6 { animation-delay: 0.10s; }
-  .wr5 { animation-delay: 0.20s; } .wr4 { animation-delay: 0.30s; }
-  .wr3 { animation-delay: 0.40s; } .wr2 { animation-delay: 0.50s; }
-  .wr1 { animation-delay: 0.60s; }
-
-  @keyframes wizBuild {
-    0%   { opacity: 0; transform: scale(0.2); }
-    70%  { opacity: 1; transform: scale(1.08); }
+  .wp { transform-box: fill-box; animation: wizPetalIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .wpn { transform-origin: center bottom; animation-delay: 0.00s; }
+  .wpe { transform-origin: left   center; animation-delay: 0.08s; }
+  .wps { transform-origin: center top;    animation-delay: 0.16s; }
+  .wpw { transform-origin: right  center; animation-delay: 0.24s; }
+  @keyframes wizPetalIn {
+    0%   { opacity: 0; transform: scale(0); }
     100% { opacity: 1; transform: scale(1); }
+  }
+  .wiz-inner { transform-box: fill-box; transform-origin: center; animation: wizInnerIn 0.3s ease-out 0.4s both; }
+  @keyframes wizInnerIn { from { opacity: 0; transform: scale(0.15); } to { opacity: 0.9; transform: scale(1); } }
+  .wiz-dot { transform-box: fill-box; transform-origin: center; animation: wizDotIn 0.25s ease-out 0.6s both; }
+  @keyframes wizDotIn { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+  .wiz-star { transform-box: fill-box; transform-origin: center; animation: wizStarPulse 2.4s ease-in-out 0.8s infinite; }
+  @keyframes wizStarPulse {
+    0%, 100% { transform: scale(1);    opacity: 1; }
+    50%       { transform: scale(0.92); opacity: 0.8; }
   }
 
   .install-step {
